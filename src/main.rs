@@ -1,16 +1,8 @@
-mod cli;
+mod error;
 mod jot;
+mod jotfile;
+mod parser;
 
 fn main() {
-    let cli = cli::parse_args();
-    let mut tasks = jot::Jot::new(cli.dir.unwrap());
-    tasks.get_tasks_from_jotfile();
-
-    if cli.list {
-        tasks.display_tasks();
-        return;
-    }
-
-    println!("{:?}", tasks);
-    println!("Running task: {}", "abc")
+    jot::run();
 }

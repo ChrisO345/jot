@@ -3,6 +3,10 @@ name = "jot"
 version = "0.0.1"
 edition = "2024"
 
+[[bin]]
+path = "src/main.rs"
+name = "jot"
+
 [dependencies]
 clap = { version = "4.5.40", features = ["derive"] }
 owo-colors = "4.2.2"

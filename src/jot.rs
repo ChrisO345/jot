@@ -1,69 +1,60 @@
-use std::collections::HashMap;
-use std::{fs, path::PathBuf};
+use super::*;
 
-use owo_colors::OwoColorize;
+use clap::Parser;
+use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Parser)]
+#[command(
+    name = "jot",
+    version = "0.0.1",
+    long_about = r#"jot is a simple command-runner inspired by task runners like make, but more lightweight.
+
+It reads tasks from a plain text "jotfile" and allows you to run them easily from the command line.
+
+Examples:
+  jot build        # Runs the "build" task from the jotfile
+  jot --list       # Lists all available tasks
+
+By default, jot looks for a file named "jotfile" in the current directory, unless you specify another directory with --dir."#,
+    arg_required_else_help = true // TODO: this might want to be changed to list tasks if no task is specified.
+)]
 pub(crate) struct Jot {
-    pub _dir: PathBuf,
-    pub jotfile: PathBuf,
-    pub tasks: HashMap<String, String>,
+    /// The task to run
+    #[arg(value_name = "TASK")]
+    pub task: Option<String>,
+
+    /// List all tasks in the jotfile
+    #[arg(short, long)]
+    pub list: bool,
+
+    /// The directory to find the jotfile in
+    #[arg(short, long, value_name = "DIR")]
+    pub dir: Option<PathBuf>,
+
+    /// Override the jotfile filename
+    #[arg(short, long, value_name = "JOTFILE")]
+    pub jotfile: Option<String>,
+
+    /// Override the shell to use for executing tasks
+    #[arg(short, long, value_name = "SHELL")]
+    pub shell: Option<String>,
 }
 
-#[allow(dead_code)]
-impl Jot {
-    pub(crate) fn new(dir: PathBuf) -> Self {
-        Jot {
-            _dir: dir.clone(),
-            jotfile: dir.join("jotfile"),
-            tasks: HashMap::new(),
-        }
+pub(crate) fn run() {
+    let cli = Jot::parse();
+
+    let mut jotfile = jotfile::Jotfile::new(cli.dir, cli.jotfile, cli.shell);
+    jotfile.get_tasks_from_jotfile();
+
+    if cli.list {
+        jotfile.display_tasks();
+        return;
     }
 
-    pub(crate) fn validate_jotfile_path(&self) -> bool {
-        if let Ok(does_exist) = fs::exists(&self.jotfile) {
-            if does_exist {
-                return true;
-            } else {
-                println!(
-                    "{}",
-                    "Could not find jotfile in the specified directory".red()
-                );
-            }
-        } else {
-            println!("{}", "Error checking for jotfile existence".red());
-        }
-
-        return false;
+    if let Some(task) = cli.task {
+        jotfile.execute_task(&task);
+        return;
     }
 
-    pub(crate) fn get_tasks_from_jotfile(&mut self) {
-        if !self.validate_jotfile_path() {
-            return;
-        }
-
-        let contents = fs::read_to_string(&self.jotfile).expect("Could not read jotfile");
-        for line in contents.lines() {
-            if let Some((task, command)) = line.split_once(':') {
-                self.tasks
-                    .insert(task.trim().to_string(), command.trim().to_string());
-            }
-        }
-    }
-
-    pub(crate) fn get_task(&self, task: &str) -> Option<&String> {
-        self.tasks.get(task)
-    }
-
-    pub(crate) fn display_tasks(&self) {
-        if self.tasks.is_empty() {
-            println!("{}", "No tasks found in the jotfile".yellow());
-            return;
-        }
-
-        println!("{}:", "Available tasks".bold().underline());
-        for (task, command) in &self.tasks {
-            println!("{}: {}", task.bold(), command);
-        }
-    }
+    unreachable!()
 }

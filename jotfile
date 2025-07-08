@@ -1,3 +1,11 @@
-line1: echo "Hi"
-line2: echo "Hello, World!"
+# This does not work as it tries to overwrite the jot binary
+add: cargo build --target-dir target/debug && cp target/debug/jot $CARGO_HOME/bin/jot
 
+abc: echo "Single line command"
+
+def:
+  echo "Overline command"
+
+pwd:
+  echo "$(pwd)" && \
+  echo "Echoed from a jotfile"
