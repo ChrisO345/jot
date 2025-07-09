@@ -6,6 +6,7 @@ use crate::jotfile;
 pub(crate) struct Parser {
     line: usize,
     num_lines: usize,
+    current_section: Option<String>,
 }
 
 #[allow(dead_code)]
@@ -14,6 +15,7 @@ impl Parser {
         Parser {
             line: 0,
             num_lines: 0,
+            current_section: None,
         }
     }
 
@@ -28,8 +30,12 @@ impl Parser {
                 continue;
             }
 
+            // FIXME: This is not the ideal way to handle line types, but will likely
+            // need a full ast at some point.
             if line.contains(":=") {
                 self.parse_var_line(&contents, jotfile);
+            } else if line.contains("=") {
+                self.parse_section_line(&contents, jotfile);
             } else if line.contains(":") {
                 self.parse_task_line(&contents, jotfile);
             } else {
@@ -42,6 +48,7 @@ impl Parser {
         }
     }
 
+    // TODO: Break down into smaller functions for better readability
     fn parse_task_line(&mut self, contents: &str, jotfile: &mut jotfile::Jotfile) {
         let curr_line = contents
             .lines()
@@ -99,7 +106,17 @@ impl Parser {
             self.line += 1;
         }
 
-        jotfile.tasks.insert(task_name, command.trim().to_string());
+        jotfile
+            .tasks
+            .insert(task_name.clone(), command.trim().to_string());
+
+        if !self.current_section.is_none() {
+            jotfile
+                .sections
+                .entry(self.current_section.clone().unwrap())
+                .or_default()
+                .push(task_name.clone());
+        }
     }
 
     fn parse_var_line(&mut self, contents: &str, jotfile: &mut jotfile::Jotfile) {
@@ -129,6 +146,36 @@ impl Parser {
         }
 
         jotfile.vars.insert(var_name, command);
+        self.line += 1;
+    }
+
+    fn parse_section_line(&mut self, contents: &str, jotfile: &mut jotfile::Jotfile) {
+        let curr_line = contents
+            .lines()
+            .nth(self.line)
+            .unwrap_or_else(|| unreachable!());
+
+        let parts: Vec<&str> = curr_line.splitn(2, '=').collect();
+        if parts.len() != 2 {
+            error::raise_error(&format!(
+                "Invalid section definition at line {}: {}",
+                self.line + 1,
+                curr_line
+            ));
+        }
+
+        let section_name = parts[1].trim().to_string();
+
+        if section_name.is_empty() {
+            error::raise_error(&format!(
+                "Section '{}' is missing a command at line {}",
+                section_name,
+                self.line + 1
+            ));
+        }
+
+        jotfile.sections.insert(section_name.clone(), vec![]);
+        self.current_section = Some(section_name);
         self.line += 1;
     }
 }

@@ -2,11 +2,15 @@
 # Define a shell to override the system shell
 shell := sh
 
+other: echo "This is another command"
+
 # jot meta commands
+= Meta
 bin:
   cp target/debug/jot $CARGO_HOME/bin/jot
 
 # Other example format
+= Examples/Tests
 single: echo "Single line command"
 
 over:

@@ -13,6 +13,8 @@ pub(crate) struct Jotfile {
 
     pub(crate) vars: HashMap<String, String>,
     pub(crate) overrides: HashMap<String, String>,
+
+    pub(crate) sections: HashMap<String, Vec<String>>,
 }
 
 impl Jotfile {
@@ -29,6 +31,8 @@ impl Jotfile {
 
             vars: HashMap::new(),
             overrides: HashMap::new(),
+
+            sections: HashMap::new(),
         };
 
         jotfile.overrides.insert(
@@ -75,10 +79,26 @@ impl Jotfile {
             return;
         }
 
-        // TODO: Improve the display format
-        println!("{}:", "Available tasks".bold().underline());
+        println!("{}:", "Jotfile".bold().underline().green());
+
+        // Iterate over tasks that don't have a section and print them
         for (task, command) in &self.tasks {
-            println!("{}: {}", task.bold(), command);
+            if !self.sections.values().any(|tasks| tasks.contains(task)) {
+                println!("  {}:\n    {}", task.bold().yellow(), command);
+            }
+        }
+
+        if !self.sections.is_empty() {
+            for (section, tasks) in &self.sections {
+                println!("\n{}:", section.bold().underline().purple());
+                for task in tasks {
+                    if let Some(command) = self.get_task(task) {
+                        println!("  {}:\n    {}", task.bold().yellow(), command);
+                    } else {
+                        unreachable!()
+                    }
+                }
+            }
         }
     }
 

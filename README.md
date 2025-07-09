@@ -25,6 +25,9 @@ cargo build --release
 
 # It is recommend to copy the binary to a directory in your PATH
 cp target/release/jot $CARGO_HOME/bin/jot
+
+# Alternatively you can install jot using jot
+cargo run --release -- bin
 ```
 
 ---
@@ -40,8 +43,8 @@ jot build
 # List all tasks defined in the jotfile
 jot --list
 
-# Specify a different directory containing your jotfile
-jot --dir /path/to/project build
+# List the help message
+jot --help
 ```
 
 ---
@@ -50,7 +53,41 @@ jot --dir /path/to/project build
 
 **jot is still in early stages of development. This section will be updated as features are added.**
 
-Lines starting with `#` are comments and ignored.
+- A new command is defined in a jotfile using the following format:
+```jotfile
+bin:
+  cp target/release/jot $CARGO_HOME/bin/jot
+```
+
+- You can define sections in a jotfile to group commands. Any line starting with `=` is considered to be a section header.
+```jotfile
+= Cargo Commands
+build:
+  cargo build --release
+
+test:
+  cargo test
+```
+
+- Lines starting with `#` are comments and will be ignored by `jot`:
+```jotfile
+# This is a comment
+= Example Section
+example:
+  echo "This is an example command"
+```
+
+- Commands can continue over multiple lines by using a backslash (`\`) at the end of the line:
+```jotfile
+= Multi-line Command Example
+multi-line:
+  echo "This is a command that spans \
+  multiple lines"
+
+other-command:
+  echo "This is another command" && \
+  echo "that also spans multiple lines"
+```
 
 ---
 
