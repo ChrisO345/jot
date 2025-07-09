@@ -1,7 +1,7 @@
-use super::*;
-
 use std::collections::HashMap;
 use std::{fs, path::PathBuf};
+
+use crate::{error, parser};
 
 use owo_colors::OwoColorize;
 
@@ -11,7 +11,8 @@ pub(crate) struct Jotfile {
     pub(crate) jotfile: PathBuf,
     pub(crate) tasks: HashMap<String, String>,
 
-    pub(crate) shell: String,
+    pub(crate) vars: HashMap<String, String>,
+    pub(crate) overrides: HashMap<String, String>,
 }
 
 impl Jotfile {
@@ -21,14 +22,21 @@ impl Jotfile {
         shell: Option<String>,
     ) -> Self {
         let dir = dir.map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
-        Jotfile {
+        let mut jotfile = Jotfile {
             dir: dir.clone(),
             jotfile: dir.join(jotfile.unwrap_or_else(|| "jotfile".to_string())),
             tasks: HashMap::new(),
 
-            shell: shell
-                .unwrap_or_else(|| std::env::var("SHELL").unwrap_or_else(|_| "sh".to_string())),
-        }
+            vars: HashMap::new(),
+            overrides: HashMap::new(),
+        };
+
+        jotfile.overrides.insert(
+            "shell".to_string(),
+            shell.unwrap_or_else(|| std::env::var("SHELL").unwrap_or_else(|_| "".to_string())),
+        );
+
+        return jotfile;
     }
 
     pub(crate) fn validate_jotfile_path(&self) -> bool {
@@ -63,10 +71,11 @@ impl Jotfile {
 
     pub(crate) fn display_tasks(&self) {
         if self.tasks.is_empty() {
-            println!("{}", "No tasks found in the jotfile".yellow());
+            error::raise_warning("No tasks found in the jotfile. Please add some tasks to run.");
             return;
         }
 
+        // TODO: Improve the display format
         println!("{}:", "Available tasks".bold().underline());
         for (task, command) in &self.tasks {
             println!("{}: {}", task.bold(), command);
@@ -76,36 +85,47 @@ impl Jotfile {
     pub(crate) fn execute_task(&self, task: &str) {
         if let Some(command) = self.get_task(task) {
             if let Err(e) = std::env::set_current_dir(&self.dir) {
-                eprintln!(
-                    "{}",
-                    format!(
-                        "Failed to change directory to '{}': {}",
-                        self.dir.display(),
-                        e
-                    )
-                    .red()
-                );
+                error::raise_error(&format!(
+                    "Failed to change directory to '{}': {}",
+                    self.dir.display(),
+                    e
+                ));
                 return;
             }
 
-            let status = std::process::Command::new(&self.shell)
+            let shell = self
+                .overrides
+                .get("shell")
+                .map(|s| s.as_str())
+                .or_else(|| self.vars.get("shell").map(|s| s.as_str()))
+                .unwrap_or_else(|| unreachable!());
+
+            let status = std::process::Command::new(shell)
                 .arg("-c")
                 .arg(command)
                 .status();
             match status {
                 Ok(_) => {}
                 Err(e) => {
-                    eprintln!(
-                        "{}",
-                        format!("Failed to execute task '{}': {}", task.bold(), e).red()
-                    );
+                    error::raise_error(&format!(
+                        "Failed to execute task '{}': {}",
+                        task.bold().yellow(),
+                        e
+                    ));
                 }
             }
         } else {
-            eprintln!(
-                "{}",
-                format!("Task '{}' not found in the jotfile.", task.bold()).red()
-            );
+            error::raise_error(&format!(
+                "Task '{}' not found in the jotfile.",
+                task.bold().yellow()
+            ));
+        }
+    }
+
+    pub(crate) fn fill_default_options(&mut self) {
+        if !self.vars.contains_key("shell") {
+            let shell = std::env::var("SHELL").unwrap_or_else(|_| "sh".to_string());
+            self.vars.insert("shell".to_string(), shell);
         }
     }
 }

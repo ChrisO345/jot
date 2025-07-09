@@ -1,7 +1,8 @@
-use super::*;
+use std::path::PathBuf;
+
+use crate::jotfile;
 
 use clap::Parser;
-use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -50,6 +51,8 @@ pub(crate) fn run() {
         jotfile.display_tasks();
         return;
     }
+
+    jotfile.fill_default_options();
 
     if let Some(task) = cli.task {
         jotfile.execute_task(&task);

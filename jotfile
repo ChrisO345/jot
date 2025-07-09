@@ -1,11 +1,21 @@
-# This does not work as it tries to overwrite the jot binary
-add: cargo build --target-dir target/debug && cp target/debug/jot $CARGO_HOME/bin/jot
+## Jotfile for jot, a simple task runner
+# Define a shell to override the system shell
+shell := sh
 
-abc: echo "Single line command"
+# jot meta commands
+bin:
+  cp target/debug/jot $CARGO_HOME/bin/jot
 
-def:
+# Other example format
+single: echo "Single line command"
+
+over:
   echo "Overline command"
 
-pwd:
-  echo "$(pwd)" && \
+multi:
+  echo "This is a multi-line command" && \
   echo "Echoed from a jotfile"
+
+cont:
+  echo "Continuation command \
+  with a backslash"

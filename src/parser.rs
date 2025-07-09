@@ -17,6 +17,31 @@ impl Parser {
         }
     }
 
+    pub(crate) fn parse(&mut self, jotfile: &mut jotfile::Jotfile) {
+        let contents = fs::read_to_string(&jotfile.jotfile).expect("Could not read jotfile");
+        self.num_lines = contents.lines().count();
+
+        while let Some(line) = contents.lines().nth(self.line) {
+            let trimmed_line = line.trim();
+            if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
+                self.line += 1;
+                continue;
+            }
+
+            if line.contains(":=") {
+                self.parse_var_line(&contents, jotfile);
+            } else if line.contains(":") {
+                self.parse_task_line(&contents, jotfile);
+            } else {
+                error::raise_error(&format!(
+                    "Invalid line at {}: '{}'. Expected a task definition.",
+                    self.line + 1,
+                    line
+                ));
+            }
+        }
+    }
+
     fn parse_task_line(&mut self, contents: &str, jotfile: &mut jotfile::Jotfile) {
         let curr_line = contents
             .lines()
@@ -24,7 +49,6 @@ impl Parser {
             .unwrap_or_else(|| unreachable!());
 
         let parts: Vec<&str> = curr_line.splitn(2, ':').collect();
-
         if parts.len() != 2 {
             error::raise_error(&format!(
                 "Invalid task definition at line {}: {}",
@@ -78,26 +102,33 @@ impl Parser {
         jotfile.tasks.insert(task_name, command.trim().to_string());
     }
 
-    pub(crate) fn parse(&mut self, jotfile: &mut jotfile::Jotfile) {
-        let contents = fs::read_to_string(&jotfile.jotfile).expect("Could not read jotfile");
-        self.num_lines = contents.lines().count();
+    fn parse_var_line(&mut self, contents: &str, jotfile: &mut jotfile::Jotfile) {
+        let curr_line = contents
+            .lines()
+            .nth(self.line)
+            .unwrap_or_else(|| unreachable!());
 
-        while let Some(line) = contents.lines().nth(self.line) {
-            let trimmed_line = line.trim();
-            if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
-                self.line += 1;
-                continue;
-            }
-
-            if line.contains(":") {
-                self.parse_task_line(&contents, jotfile);
-            } else {
-                error::raise_error(&format!(
-                    "Invalid line at {}: '{}'. Expected a task definition.",
-                    self.line + 1,
-                    line
-                ));
-            }
+        let parts: Vec<&str> = curr_line.splitn(2, ":=").collect();
+        if parts.len() != 2 {
+            error::raise_error(&format!(
+                "Invalid var definition at line {}: {}",
+                self.line + 1,
+                curr_line
+            ));
         }
+
+        let var_name = parts[0].trim().to_string();
+        let command = parts[1].trim().to_string();
+
+        if command.is_empty() {
+            error::raise_error(&format!(
+                "Variable '{}' is missing a command at line {}",
+                var_name,
+                self.line + 1
+            ));
+        }
+
+        jotfile.vars.insert(var_name, command);
+        self.line += 1;
     }
 }
