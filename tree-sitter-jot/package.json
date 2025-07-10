@@ -1,0 +1,41 @@
+{
+  "name": "tree-sitter-jot",
+  "version": "0.0.1",
+  "description": "Jot grammar for tree-sitter",
+  "repository": "https://github.com/tree-sitter/tree-sitter-jot",
+  "license": "MIT",
+  "author": {
+    "name": "Chris O"
+  },
+  "main": "index.js",
+  "keywords": [
+    "incremental",
+    "parsing",
+    "tree-sitter",
+    "jot"
+  ],
+  "files": [
+    "grammar.js",
+    "tree-sitter.json",
+    "prebuilds/**",
+    "queries/*",
+    "src/**",
+    "*.wasm"
+  ],
+  "dependencies": {
+    "node-addon-api": "^8.2.1",
+    "node-gyp-build": "^4.8.2"
+  },
+  "devDependencies": {
+    "prebuildify": "^6.0.1",
+    "tree-sitter-cli": "^0.25.6"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.1"
+  },
+  "peerDependenciesMeta": {
+    "tree-sitter": {
+      "optional": true
+    }
+  }
+}

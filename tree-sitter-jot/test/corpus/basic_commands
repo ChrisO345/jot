@@ -1,0 +1,48 @@
+=====
+Inline Command
+=====
+
+abc: echo "This is no semicolon command"
+
+---
+
+(source_file
+  (command_definition
+    (command_name
+      (identifier))
+    (command_body
+      (cmd))))
+
+=====
+Single Overline Command
+=====
+
+build:
+  echo "Building the project...";
+
+---
+
+(source_file
+  (command_definition
+    (command_name
+      (identifier))
+    (command_body
+      (cmd))))
+
+=====
+Multiple Overline Commands
+=====
+
+deploy:
+  echo "Deploying the application..."
+  echo "Deployment complete.";
+
+---
+
+(source_file
+  (command_definition
+    (command_name
+      (identifier))
+    (command_body
+      (cmd)
+      (cmd))))

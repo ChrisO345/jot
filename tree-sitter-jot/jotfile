@@ -1,0 +1,14 @@
+="Build and Test Jot Tree-Sitter Grammar"
+build:
+  tree-sitter generate;
+
+test:
+  jot build && tree-sitter test;
+
+update:
+  tree-sitter test --update;
+
+="Update Jot Highlighting"
+queries:
+  mkdir -p ~/.local/share/nvim/lazy/nvim-treesitter/queries/jot
+  cp -rv queries/* ~/.local/share/nvim/lazy/nvim-treesitter/queries/jot/;

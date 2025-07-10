@@ -1,0 +1,38 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "jot",
+      "camelcase": "Jot",
+      "title": "Jot",
+      "scope": "source.jot",
+      "file-types": [
+        "jotfile"
+      ],
+      "injection-regex": "^jot$",
+      "class-name": "TreeSitterJot"
+    }
+  ],
+  "metadata": {
+    "version": "0.0.1",
+    "license": "MIT",
+    "description": "Jot grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Chris O"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-jot"
+    }
+  },
+  "bindings": {
+    "c": false,
+    "go": false,
+    "node": true,
+    "python": false,
+    "rust": false,
+    "swift": false,
+    "zig": false
+  }
+}

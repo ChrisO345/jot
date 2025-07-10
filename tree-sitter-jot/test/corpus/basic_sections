@@ -1,0 +1,25 @@
+=====
+Single Word Section
+=====
+
+=Section
+
+---
+
+(source_file
+  (section_definition
+    (section_name
+      (identifier))))
+
+=====
+Multi Word Section
+=====
+
+="Section Name"
+
+---
+
+(source_file
+  (section_definition
+    (section_name
+      (string))))

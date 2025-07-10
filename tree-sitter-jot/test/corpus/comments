@@ -1,0 +1,30 @@
+=====
+Comments
+=====
+
+# Test Comment for jotfiles
+
+---
+
+(source_file
+  (comment))
+
+=====
+Comments between Commands
+=====
+
+build:
+  echo "Building the project"
+  # This is a comment between commands
+  echo "Build complete";
+
+---
+
+(source_file
+  (command_definition
+    (command_name
+      (identifier))
+    (command_body
+      (cmd)
+      (comment)
+      (cmd))))
