@@ -2,24 +2,26 @@
 # Define a shell to override the system shell
 shell := sh
 
-other: echo "This is another command"
+other:
+  echo "overline"
+  echo "over2";
 
 # jot meta commands
 = Meta
 bin:
-  cp target/debug/jot $CARGO_HOME/bin/jot
+  cp target/debug/jot $CARGO_HOME/bin/jot;
+
+list:
+  cargo run -- -l;
 
 # Other example format
-= Examples/Tests
+= "Examples/Tests"
 single: echo "Single line command"
 
 over:
-  echo "Overline command"
+  echo "Overline command";
 
 multi:
-  echo "This is a multi-line command" && \
-  echo "Echoed from a jotfile"
-
-cont:
-  echo "Continuation command \
-  with a backslash"
+  echo "This is a multi-command command"
+  # comment
+  echo "Echoed from a jotfile";

@@ -1,19 +1,17 @@
 use std::collections::HashMap;
 use std::{fs, path::PathBuf};
 
-use crate::{error, parser};
-
 use owo_colors::OwoColorize;
+
+use crate::{error, parser};
 
 #[derive(Debug)]
 pub(crate) struct Jotfile {
     pub(crate) dir: PathBuf,
     pub(crate) jotfile: PathBuf,
-    pub(crate) tasks: HashMap<String, String>,
-
+    pub(crate) tasks: HashMap<String, Vec<String>>,
     pub(crate) vars: HashMap<String, String>,
     pub(crate) overrides: HashMap<String, String>,
-
     pub(crate) sections: HashMap<String, Vec<String>>,
 }
 
@@ -23,68 +21,63 @@ impl Jotfile {
         jotfile: Option<String>,
         shell: Option<String>,
     ) -> Self {
-        let dir = dir.map(PathBuf::from).unwrap_or_else(|| PathBuf::from("."));
+        let dir = dir.unwrap_or_else(|| PathBuf::from("."));
+        let jotfile_path = dir.join(jotfile.unwrap_or_else(|| "jotfile".to_string()));
+
         let mut jotfile = Jotfile {
             dir: dir.clone(),
-            jotfile: dir.join(jotfile.unwrap_or_else(|| "jotfile".to_string())),
+            jotfile: jotfile_path,
             tasks: HashMap::new(),
-
             vars: HashMap::new(),
             overrides: HashMap::new(),
-
             sections: HashMap::new(),
         };
 
         jotfile.overrides.insert(
             "shell".to_string(),
-            shell.unwrap_or_else(|| std::env::var("SHELL").unwrap_or_else(|_| "".to_string())),
+            shell
+                .or_else(|| std::env::var("SHELL").ok())
+                .unwrap_or_else(|| "".to_string()),
         );
 
-        return jotfile;
+        jotfile
     }
 
     pub(crate) fn validate_jotfile_path(&self) -> bool {
-        if let Ok(does_exist) = fs::exists(&self.jotfile) {
-            if does_exist {
+        if let Ok(exists) = fs::metadata(&self.jotfile) {
+            if exists.is_file() {
                 return true;
             } else {
-                println!(
-                    "{}",
-                    "Could not find jotfile in the specified directory".red()
-                );
+                println!("{}", "Jotfile path is not a file.".red());
             }
         } else {
-            println!("{}", "Error checking for jotfile existence".red());
+            println!("{}", "Error checking jotfile existence.".red());
         }
-
-        return false;
+        false
     }
 
     pub(crate) fn get_tasks_from_jotfile(&mut self) {
-        if !self.validate_jotfile_path() {
-            return;
+        if self.validate_jotfile_path() {
+            let mut parser = parser::Parser::new();
+            parser.parse(self);
         }
-
-        let mut parser = parser::Parser::new();
-        parser.parse(self);
     }
 
-    pub(crate) fn get_task(&self, task: &str) -> Option<&String> {
-        self.tasks.get(task)
+    pub(crate) fn get_task(&self, name: &str) -> &Vec<String> {
+        self.tasks.get(name).unwrap_or_else(|| unreachable!())
     }
 
     pub(crate) fn display_tasks(&self) {
         if self.tasks.is_empty() {
-            error::raise_warning("No tasks found in the jotfile. Please add some tasks to run.");
+            error::raise_warning("No tasks found in the jotfile. Please add some tasks.");
             return;
         }
 
         println!("{}:", "Jotfile".bold().underline().green());
 
-        // Iterate over tasks that don't have a section and print them
-        for (task, command) in &self.tasks {
+        for (task, _) in &self.tasks {
             if !self.sections.values().any(|tasks| tasks.contains(task)) {
-                println!("  {}:\n    {}", task.bold().yellow(), command);
+                self.print_task(task);
             }
         }
 
@@ -92,53 +85,50 @@ impl Jotfile {
             for (section, tasks) in &self.sections {
                 println!("\n{}:", section.bold().underline().purple());
                 for task in tasks {
-                    if let Some(command) = self.get_task(task) {
-                        println!("  {}:\n    {}", task.bold().yellow(), command);
-                    } else {
-                        unreachable!()
-                    }
+                    self.print_task(task);
                 }
             }
         }
     }
 
+    fn print_task(&self, task: &str) {
+        println!("  {}:", task.bold().yellow());
+        for cmd in self.get_task(task) {
+            println!("    {}", cmd);
+        }
+    }
+
     pub(crate) fn execute_task(&self, task: &str) {
-        if let Some(command) = self.get_task(task) {
-            if let Err(e) = std::env::set_current_dir(&self.dir) {
-                error::raise_error(&format!(
-                    "Failed to change directory to '{}': {}",
-                    self.dir.display(),
-                    e
-                ));
-                return;
-            }
+        let cmds = self.get_task(task);
 
-            let shell = self
-                .overrides
-                .get("shell")
-                .map(|s| s.as_str())
-                .or_else(|| self.vars.get("shell").map(|s| s.as_str()))
-                .unwrap_or_else(|| unreachable!());
+        if let Err(e) = std::env::set_current_dir(&self.dir) {
+            error::raise_error(&format!(
+                "Failed to change directory to '{}': {}",
+                self.dir.display(),
+                e
+            ));
+        }
 
+        let shell = self
+            .overrides
+            .get("shell")
+            .or_else(|| self.vars.get("shell"))
+            .map(|s| s.as_str())
+            .unwrap_or_else(|| unreachable!());
+
+        for command in cmds {
             let status = std::process::Command::new(shell)
                 .arg("-c")
                 .arg(command)
                 .status();
-            match status {
-                Ok(_) => {}
-                Err(e) => {
-                    error::raise_error(&format!(
-                        "Failed to execute task '{}': {}",
-                        task.bold().yellow(),
-                        e
-                    ));
-                }
+
+            if let Err(e) = status {
+                error::raise_error(&format!(
+                    "Failed to execute task '{}': {}",
+                    task.bold().yellow(),
+                    e
+                ));
             }
-        } else {
-            error::raise_error(&format!(
-                "Task '{}' not found in the jotfile.",
-                task.bold().yellow()
-            ));
         }
     }
 

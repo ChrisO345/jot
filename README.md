@@ -1,5 +1,8 @@
 # jot
 
+> [!WARNING]
+> Jot is still in early stages of development. There will be breaking changes as features are added and improved.
+
 `jot` is a lightweight, fast, and easy-to-use command runner for tasks defined in a plain text jotfile. Designed for simplicity and developer productivity, it lets you define custom commands and run them effortlessly from the command line.
 
 ---
@@ -54,39 +57,27 @@ jot --help
 **jot is still in early stages of development. This section will be updated as features are added.**
 
 - A new command is defined in a jotfile using the following format:
-```jotfile
+```jot
 bin:
-  cp target/release/jot $CARGO_HOME/bin/jot
+  cp target/release/jot $CARGO_HOME/bin/jot;
 ```
 
 - You can define sections in a jotfile to group commands. Any line starting with `=` is considered to be a section header.
-```jotfile
+```jot
 = Cargo Commands
 build:
-  cargo build --release
+  cargo build --release;
 
 test:
-  cargo test
+  cargo test;
 ```
 
 - Lines starting with `#` are comments and will be ignored by `jot`:
-```jotfile
+```jot
 # This is a comment
 = Example Section
 example:
-  echo "This is an example command"
-```
-
-- Commands can continue over multiple lines by using a backslash (`\`) at the end of the line:
-```jotfile
-= Multi-line Command Example
-multi-line:
-  echo "This is a command that spans \
-  multiple lines"
-
-other-command:
-  echo "This is another command" && \
-  echo "that also spans multiple lines"
+  echo "This is an example command";
 ```
 
 ---
