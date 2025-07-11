@@ -25,3 +25,11 @@ multi:
   echo "This is a multi-command command"
   # comment
   echo "Echoed from a jotfile";
+
+ref:
+  @reference;
+
+reference:
+# Comment
+  @single
+  @over;

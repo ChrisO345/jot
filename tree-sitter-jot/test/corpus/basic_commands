@@ -11,7 +11,7 @@ abc: echo "This is no semicolon command"
     (command_name
       (identifier))
     (command_body
-      (cmd))))
+      (command))))
 
 =====
 Single Overline Command
@@ -27,7 +27,7 @@ build:
     (command_name
       (identifier))
     (command_body
-      (cmd))))
+      (command))))
 
 =====
 Multiple Overline Commands
@@ -44,5 +44,19 @@ deploy:
     (command_name
       (identifier))
     (command_body
-      (cmd)
-      (cmd))))
+      (command)
+      (command))))
+
+=====
+Referential Command
+=====
+
+build:
+  echo "Building the project...";
+
+refer:
+  @build;
+
+---
+
+

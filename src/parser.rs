@@ -46,6 +46,8 @@ impl Parser {
                 ));
             }
         }
+
+        self.unpack_self_references(jotfile);
     }
 
     fn parse_var_line(&mut self, jotfile: &mut jotfile::Jotfile) {
@@ -149,6 +151,29 @@ impl Parser {
             ));
         }
         (parts[0].trim().to_string(), parts[1].trim().to_string())
+    }
+
+    fn unpack_self_references(&self, jotfile: &mut jotfile::Jotfile) {
+        let task_names = jotfile.tasks.keys().cloned().collect::<Vec<String>>();
+
+        for (task_name, command) in jotfile.tasks.iter_mut() {
+            // iterate over index of vector
+            for part in command.iter_mut() {
+                if part.starts_with('@') {
+                    let referenced = part.trim().trim_start_matches('@');
+
+                    if !task_names.contains(&referenced.to_string()) {
+                        error::raise_error(&format!(
+                            "Task '{}' references non-existent task '{}' at line {}",
+                            task_name,
+                            referenced,
+                            self.line_index + 1
+                        ));
+                    }
+                }
+                *part = part.replace('@', "jot ").to_string();
+            }
+        }
     }
 
     fn collect_multiline_command(&mut self) -> Vec<String> {

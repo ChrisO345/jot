@@ -8,6 +8,9 @@
 ; strings
 (string) @string
 
+; references
+(reference) @annotation
+
 ; numbers
 ; (number) @number
 

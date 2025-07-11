@@ -1,8 +1,18 @@
 [
   {
-    "type": "cmd",
+    "type": "command",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "reference",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "command_body",
@@ -13,7 +23,7 @@
       "required": false,
       "types": [
         {
-          "type": "cmd",
+          "type": "command",
           "named": true
         }
       ]
@@ -139,6 +149,10 @@
   },
   {
     "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "reference",
     "named": true
   }
 ]

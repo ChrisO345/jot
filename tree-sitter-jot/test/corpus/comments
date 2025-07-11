@@ -25,6 +25,6 @@ build:
     (command_name
       (identifier))
     (command_body
-      (cmd)
+      (command)
       (comment)
-      (cmd))))
+      (command))))

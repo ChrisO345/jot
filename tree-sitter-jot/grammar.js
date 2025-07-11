@@ -6,6 +6,7 @@ const colon = ':';
 const semicolon = ';';
 const equal = '=';
 const newline = /\r?\n/;
+const reference = /@/;
 
 module.exports = grammar({
   name: "jot",
@@ -36,7 +37,7 @@ module.exports = grammar({
     ),
 
     _inline_command_body: $ => seq(
-      $.cmd,
+      $.command,
       optional(semicolon),
     ),
 
@@ -44,7 +45,7 @@ module.exports = grammar({
       repeat(
         seq(
           newline,
-          $.cmd,
+          $.command,
         ),
       ),
       semicolon,
@@ -66,7 +67,12 @@ module.exports = grammar({
     comment: _ => token(seq('#', /.*/)),
 
     // TERMINALS
-    cmd: $ => repeat1(/[^\s\n\r;#]+/,),
+    command: $ => seq(
+      optional($.reference),
+      $._cmd,
+    ),
+
+    _cmd: $ => repeat1(/[^\s\n\r;#@]+/,),
 
     identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
 
@@ -78,6 +84,8 @@ module.exports = grammar({
       )),
       '"',
     ),
+
+    reference: $ => reference,
   },
 
   extras: $ => [

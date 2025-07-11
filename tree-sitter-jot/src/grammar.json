@@ -70,7 +70,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "cmd"
+          "name": "command"
         },
         {
           "type": "CHOICE",
@@ -100,7 +100,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "cmd"
+                "name": "command"
               }
             ]
           }
@@ -157,11 +157,32 @@
         ]
       }
     },
-    "cmd": {
+    "command": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "reference"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_cmd"
+        }
+      ]
+    },
+    "_cmd": {
       "type": "REPEAT1",
       "content": {
         "type": "PATTERN",
-        "value": "[^\\s\\n\\r;#]+"
+        "value": "[^\\s\\n\\r;#@]+"
       }
     },
     "identifier": {
@@ -205,6 +226,10 @@
           "value": "\""
         }
       ]
+    },
+    "reference": {
+      "type": "PATTERN",
+      "value": "@"
     }
   },
   "extras": [
