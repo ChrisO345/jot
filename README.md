@@ -5,6 +5,8 @@
 
 `jot` is a lightweight, fast, and easy-to-use command runner for tasks defined in a plain text jotfile. Designed for simplicity and developer productivity, it lets you define custom commands and run them effortlessly from the command line.
 
+Note that this repository also contains a Neovim plugin, [jot.nvim](jot.nvim), and a Tree-Sitter grammar [jot-tree-sitter](jot-treesitter) for jotfiles.
+
 ---
 
 ## Features
