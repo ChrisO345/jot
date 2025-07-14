@@ -32,7 +32,7 @@ impl Parser {
                 continue;
             }
 
-            if trimmed.contains(":=") {
+            if trimmed.starts_with(".") {
                 self.parse_var_line(jotfile);
             } else if trimmed.contains('=') && !trimmed.contains(":=") {
                 self.parse_section_line(jotfile);
@@ -48,11 +48,12 @@ impl Parser {
         }
 
         self.unpack_self_references(jotfile);
+        self.fill_default_options(jotfile);
     }
 
     fn parse_var_line(&mut self, jotfile: &mut jotfile::Jotfile) {
-        let line = &self.lines[self.line_index];
-        let parts: Vec<&str> = line.splitn(2, ":=").collect();
+        let line: &String = &self.lines[self.line_index];
+        let parts: Vec<&str> = line.splitn(2, "=").collect();
 
         if parts.len() != 2 {
             error::raise_error(&format!(
@@ -62,10 +63,10 @@ impl Parser {
             ));
         }
 
-        let var_name = parts[0].trim();
-        let command = parts[1].trim();
+        let var_name = parts[0].trim_start_matches(".").trim();
+        let content = parts[1].trim();
 
-        if command.is_empty() {
+        if content.is_empty() {
             error::raise_error(&format!(
                 "Variable '{}' is missing a value at line {}",
                 var_name,
@@ -73,9 +74,17 @@ impl Parser {
             ));
         }
 
+        if var_name.chars().all(|c| c.is_uppercase()) {
+            jotfile
+                .configs
+                .insert(var_name.to_string(), content.to_string());
+            self.line_index += 1;
+            return;
+        }
+
         jotfile
             .vars
-            .insert(var_name.to_string(), command.to_string());
+            .insert(var_name.to_string(), content.to_string());
         self.line_index += 1;
     }
 
@@ -202,5 +211,17 @@ impl Parser {
         }
 
         command
+    }
+
+    fn fill_default_options(&self, jotfile: &mut jotfile::Jotfile) {
+        jotfile
+            .configs
+            .entry("SHELL".to_string())
+            .or_insert("sh".to_string());
+
+        jotfile
+            .configs
+            .entry("DEFAULT".to_string())
+            .or_insert("jot -l".to_string());
     }
 }

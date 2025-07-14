@@ -7,12 +7,20 @@ use crate::{error, parser};
 
 #[derive(Debug)]
 pub(crate) struct Jotfile {
+    // The directory where the jotfile is located
     pub(crate) dir: PathBuf,
+    // The name of the jotfile
     pub(crate) jotfile: PathBuf,
+    // A map of task names to their commands
     pub(crate) tasks: HashMap<String, Vec<String>>,
-    pub(crate) vars: HashMap<String, String>,
-    pub(crate) overrides: HashMap<String, String>,
+    // A map of section names to lists of task names
     pub(crate) sections: HashMap<String, Vec<String>>,
+    // A map of variable names to their values, currently unused
+    pub(crate) vars: HashMap<String, String>,
+    // A map of options defined in the jotfile
+    pub(crate) configs: HashMap<String, String>,
+    // A map of config flag overrides, e.g., shell
+    pub(crate) flag_overrides: HashMap<String, String>,
 }
 
 impl Jotfile {
@@ -28,17 +36,17 @@ impl Jotfile {
             dir: dir.clone(),
             jotfile: jotfile_path,
             tasks: HashMap::new(),
-            vars: HashMap::new(),
-            overrides: HashMap::new(),
             sections: HashMap::new(),
+            vars: HashMap::new(),
+            configs: HashMap::new(),
+            flag_overrides: HashMap::new(),
         };
 
-        jotfile.overrides.insert(
-            "shell".to_string(),
-            shell
-                .or_else(|| std::env::var("SHELL").ok())
-                .unwrap_or_else(|| "".to_string()),
-        );
+        if shell.is_some() {
+            jotfile
+                .flag_overrides
+                .insert("SHELL".to_string(), shell.unwrap_or_else(|| unreachable!()));
+        }
 
         jotfile
     }
@@ -98,8 +106,16 @@ impl Jotfile {
         }
     }
 
-    pub(crate) fn execute_task(&self, task: &str) {
-        let cmds = self.get_task(task);
+    pub(crate) fn execute_task(&self, task: Option<&str>) {
+        let mut cmds = &vec![
+            self.configs
+                .get("DEFAULT")
+                .unwrap_or_else(|| unreachable!())
+                .to_string(),
+        ];
+        if let Some(task) = task {
+            cmds = self.get_task(task);
+        }
 
         if let Err(e) = std::env::set_current_dir(&self.dir) {
             error::raise_error(&format!(
@@ -110,9 +126,9 @@ impl Jotfile {
         }
 
         let shell = self
-            .overrides
-            .get("shell")
-            .or_else(|| self.vars.get("shell"))
+            .flag_overrides
+            .get("SHELL")
+            .or_else(|| self.configs.get("SHELL"))
             .map(|s| s.as_str())
             .unwrap_or_else(|| unreachable!());
 
@@ -123,19 +139,8 @@ impl Jotfile {
                 .status();
 
             if let Err(e) = status {
-                error::raise_error(&format!(
-                    "Failed to execute task '{}': {}",
-                    task.bold().yellow(),
-                    e
-                ));
+                error::raise_error(&format!("Failed to execute command '{}': {}", command, e));
             }
-        }
-    }
-
-    pub(crate) fn fill_default_options(&mut self) {
-        if !self.vars.contains_key("shell") {
-            let shell = std::env::var("SHELL").unwrap_or_else(|_| "sh".to_string());
-            self.vars.insert("shell".to_string(), shell);
         }
     }
 }

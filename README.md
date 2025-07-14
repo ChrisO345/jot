@@ -80,6 +80,23 @@ example:
   echo "This is an example command";
 ```
 
+- Commands can be rereferenced in other commands using the `@` symbol:
+```jot
+= Example Section
+example:
+  echo "This is an example command";
+
+referenced_example:
+  @example;
+```
+
+- There are also some special variables that can be definedin a jotfile:
+```jot
+= Variables
+.SHELL=sh # The shell command to use for commands
+.DEFAULT=jot -l # The default command to run if no task is specified
+```
+
 ---
 
 ## License

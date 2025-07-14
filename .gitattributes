@@ -1,41 +1,41 @@
 * text=auto eol=lf
 
 # Generated source files
-src/*.json linguist-generated
-src/parser.c linguist-generated
-src/tree_sitter/* linguist-generated
+tree-sitter-jot/src/*.json linguist-generated
+tree-sitter-jot/src/parser.c linguist-generated
+tree-sitter-jot/src/tree_sitter/* linguist-generated
 
 # C bindings
-bindings/c/** linguist-generated
-CMakeLists.txt linguist-generated
-Makefile linguist-generated
+tree-sitter-jot/bindings/c/** linguist-generated
+tree-sitter-jot/CMakeLists.txt linguist-generated
+tree-sitter-jot/Makefile linguist-generated
 
 # Rust bindings
-bindings/rust/* linguist-generated
-Cargo.toml linguist-generated
-Cargo.lock linguist-generated
+tree-sitter-jot/bindings/rust/* linguist-generated
+tree-sitter-jot/Cargo.toml linguist-generated
+tree-sitter-jot/Cargo.lock linguist-generated
 
 # Node.js bindings
-bindings/node/* linguist-generated
-binding.gyp linguist-generated
-package.json linguist-generated
-package-lock.json linguist-generated
+tree-sitter-jot/bindings/node/* linguist-generated
+tree-sitter-jot/binding.gyp linguist-generated
+tree-sitter-jot/package.json linguist-generated
+tree-sitter-jot/package-lock.json linguist-generated
 
 # Python bindings
-bindings/python/** linguist-generated
-setup.py linguist-generated
-pyproject.toml linguist-generated
+tree-sitter-jot/bindings/python/** linguist-generated
+tree-sitter-jot/setup.py linguist-generated
+tree-sitter-jot/pyproject.toml linguist-generated
 
 # Go bindings
-bindings/go/* linguist-generated
-go.mod linguist-generated
-go.sum linguist-generated
+tree-sitter-jot/bindings/go/* linguist-generated
+tree-sitter-jot/go.mod linguist-generated
+tree-sitter-jot/go.sum linguist-generated
 
 # Swift bindings
-bindings/swift/** linguist-generated
-Package.swift linguist-generated
-Package.resolved linguist-generated
+tree-sitter-jot/bindings/swift/** linguist-generated
+tree-sitter-jot/Package.swift linguist-generated
+tree-sitter-jot/Package.resolved linguist-generated
 
 # Zig bindings
-build.zig linguist-generated
-build.zig.zon linguist-generated
+tree-sitter-jot/build.zig linguist-generated
+tree-sitter-jot/build.zig.zon linguist-generated

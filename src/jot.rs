@@ -16,8 +16,7 @@ Examples:
   jot build        # Runs the "build" task from the jotfile
   jot --list       # Lists all available tasks
 
-By default, jot looks for a file named "jotfile" in the current directory, unless you specify another directory with --dir."#,
-    arg_required_else_help = true // TODO: this might want to be changed to list tasks if no task is specified.
+By default, jot looks for a file named "jotfile" in the current directory, unless you specify another directory with --dir."#
 )]
 pub(crate) struct Jot {
     /// The task to run
@@ -52,12 +51,5 @@ pub(crate) fn run() {
         return;
     }
 
-    jotfile.fill_default_options();
-
-    if let Some(task) = cli.task {
-        jotfile.execute_task(&task);
-        return;
-    }
-
-    unreachable!()
+    jotfile.execute_task(cli.task.as_deref());
 }

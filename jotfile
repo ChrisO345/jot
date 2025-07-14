@@ -1,6 +1,6 @@
 ## Jotfile for jot, a simple task runner
-# Define a shell to override the system shell !!NOT RECOGNISED BY TREESITTER YET!!
-shell := sh
+.DEFAULT= echo "Default command executed"
+.SHELL= sh
 
 other:
   echo "overline"
