@@ -19,6 +19,10 @@
         {
           "type": "SYMBOL",
           "name": "section_definition"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "variable_definition"
         }
       ]
     },
@@ -138,6 +142,48 @@
         {
           "type": "SYMBOL",
           "name": "string"
+        }
+      ]
+    },
+    "variable_definition": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "."
+        },
+        {
+          "type": "SYMBOL",
+          "name": "variable_name"
+        },
+        {
+          "type": "STRING",
+          "value": "="
+        },
+        {
+          "type": "SYMBOL",
+          "name": "variable_value"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\r?\\n"
+        }
+      ]
+    },
+    "variable_name": {
+      "type": "SYMBOL",
+      "name": "identifier"
+    },
+    "variable_value": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "string"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_cmd"
         }
       ]
     },

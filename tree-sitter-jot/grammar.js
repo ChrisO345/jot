@@ -5,6 +5,7 @@
 const colon = ':';
 const semicolon = ';';
 const equal = '=';
+const dot = '.';
 const newline = /\r?\n/;
 const reference = /@/;
 
@@ -17,6 +18,7 @@ module.exports = grammar({
     _definition: $ => choice(
       $.command_definition,
       $.section_definition,
+      $.variable_definition,
     ),
 
     // COMMANDS
@@ -61,6 +63,22 @@ module.exports = grammar({
     section_name: $ => choice(
       $.identifier,
       $.string,
+    ),
+
+
+    // VARIABLES
+    variable_definition: $ => seq(
+      dot,
+      $.variable_name,
+      equal,
+      $.variable_value,
+      newline,
+    ),
+
+    variable_name: $ => $.identifier,
+    variable_value: $ => choice(
+      $.string,
+      $._cmd,
     ),
 
     // COMMENT

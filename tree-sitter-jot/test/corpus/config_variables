@@ -1,0 +1,35 @@
+=====
+Basic Configuation Varuiable
+=====
+
+.SHELL = sh
+
+---
+
+(source_file
+  (variable_definition
+    (variable_name
+      (identifier))
+    (variable_value)))
+
+=====
+Config Variable and Command
+=====
+
+.DEFAULT = jot -l
+
+hello:
+  echo "Hello, World!";
+
+---
+
+(source_file
+  (variable_definition
+    (variable_name
+      (identifier))
+    (variable_value))
+  (command_definition
+    (command_name
+      (identifier))
+    (command_body
+      (command))))

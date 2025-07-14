@@ -1,3 +1,5 @@
+.SHELL = sh
+
 ="Build and Test Jot Tree-Sitter Grammar"
 build:
   tree-sitter generate;
